@@ -55,18 +55,12 @@ const createGitHubPagesSite = async () => {
     }
 }
 
-const createSiteInBase64 = () => {
-    let sections = ['./snippets/header.html', './snippets/hero.html', './snippets/about.html', './snippets/grid.html', './snippets/contact.html', './snippets/footer.html'];
-    let result = '';
+const createSiteInCurHTML = () => {
+    const sections = ['./snippets/header.html', './snippets/hero.html', './snippets/about.html', './snippets/grid.html', './snippets/contact.html', './snippets/footer.html'];
     sections.forEach((sectionURL) => {
-        let sectionInBase64 = fs.readFileSync(sectionURL, {encoding: "base64"});
-        while (sectionInBase64.charAt(sectionInBase64.length - 1) === "=") {
-            sectionInBase64 = sectionInBase64.slice(0, sectionInBase64.length - 1);
-        }
-        result += sectionInBase64;
+        const sectionContent = fs.readFileSync(sectionURL);
+        fs.appendFileSync("./snippets/cur.html", sectionContent);
     })
-    result += "=";
-    return result;
 }
 
 app.post('/create', (req, res) => {
@@ -83,12 +77,10 @@ app.post('/deploy', async (req, res) => {
 })
 
 app.get('/test', async (req, res) => {
-    const fileInBase64 = createSiteInBase64();
-    console.log(fileInBase64);
-    console.log();
-    const fileInBase642 = fs.readFileSync("./snippets/index.html", { encoding: "base64" });
-    console.log(fileInBase642);
+    createSiteInCurHTML();
+    const fileInBase64 = fs.readFileSync("./snippets/cur.html", { encoding: "base64"});
     fs.writeFileSync("./testing.html", fileInBase64, "base64");
+    fs.unlinkSync("./snippets/cur.html");
     res.send("File created in testing.html");
 })
 
